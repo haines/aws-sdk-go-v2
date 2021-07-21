@@ -209,8 +209,17 @@ func NewMultiplexCreatedWaiter(client DescribeMultiplexAPIClient, optFns ...func
 // the maximum wait duration the waiter will wait. The maxWaitDur is required and
 // must be greater than zero.
 func (w *MultiplexCreatedWaiter) Wait(ctx context.Context, params *DescribeMultiplexInput, maxWaitDur time.Duration, optFns ...func(*MultiplexCreatedWaiterOptions)) error {
+	_, err := w.WaitForOutput(ctx, params, maxWaitDur, optFns...)
+	return err
+}
+
+// WaitForOutput calls the waiter function for MultiplexCreated waiter and returns
+// the output of the successful operation. The maxWaitDur is the maximum wait
+// duration the waiter will wait. The maxWaitDur is required and must be greater
+// than zero.
+func (w *MultiplexCreatedWaiter) WaitForOutput(ctx context.Context, params *DescribeMultiplexInput, maxWaitDur time.Duration, optFns ...func(*MultiplexCreatedWaiterOptions)) (*DescribeMultiplexOutput, error) {
 	if maxWaitDur <= 0 {
-		return fmt.Errorf("maximum wait time for waiter must be greater than zero")
+		return nil, fmt.Errorf("maximum wait time for waiter must be greater than zero")
 	}
 
 	options := w.options
@@ -223,7 +232,7 @@ func (w *MultiplexCreatedWaiter) Wait(ctx context.Context, params *DescribeMulti
 	}
 
 	if options.MinDelay > options.MaxDelay {
-		return fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
+		return nil, fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
 	}
 
 	ctx, cancelFn := context.WithTimeout(ctx, maxWaitDur)
@@ -251,10 +260,10 @@ func (w *MultiplexCreatedWaiter) Wait(ctx context.Context, params *DescribeMulti
 
 		retryable, err := options.Retryable(ctx, params, out, err)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !retryable {
-			return nil
+			return out, nil
 		}
 
 		remainingTime -= time.Since(start)
@@ -267,16 +276,16 @@ func (w *MultiplexCreatedWaiter) Wait(ctx context.Context, params *DescribeMulti
 			attempt, options.MinDelay, options.MaxDelay, remainingTime,
 		)
 		if err != nil {
-			return fmt.Errorf("error computing waiter delay, %w", err)
+			return nil, fmt.Errorf("error computing waiter delay, %w", err)
 		}
 
 		remainingTime -= delay
 		// sleep for the delay amount before invoking a request
 		if err := smithytime.SleepWithContext(ctx, delay); err != nil {
-			return fmt.Errorf("request cancelled while waiting, %w", err)
+			return nil, fmt.Errorf("request cancelled while waiting, %w", err)
 		}
 	}
-	return fmt.Errorf("exceeded max wait time for MultiplexCreated waiter")
+	return nil, fmt.Errorf("exceeded max wait time for MultiplexCreated waiter")
 }
 
 func multiplexCreatedStateRetryable(ctx context.Context, input *DescribeMultiplexInput, output *DescribeMultiplexOutput, err error) (bool, error) {
@@ -401,8 +410,17 @@ func NewMultiplexDeletedWaiter(client DescribeMultiplexAPIClient, optFns ...func
 // the maximum wait duration the waiter will wait. The maxWaitDur is required and
 // must be greater than zero.
 func (w *MultiplexDeletedWaiter) Wait(ctx context.Context, params *DescribeMultiplexInput, maxWaitDur time.Duration, optFns ...func(*MultiplexDeletedWaiterOptions)) error {
+	_, err := w.WaitForOutput(ctx, params, maxWaitDur, optFns...)
+	return err
+}
+
+// WaitForOutput calls the waiter function for MultiplexDeleted waiter and returns
+// the output of the successful operation. The maxWaitDur is the maximum wait
+// duration the waiter will wait. The maxWaitDur is required and must be greater
+// than zero.
+func (w *MultiplexDeletedWaiter) WaitForOutput(ctx context.Context, params *DescribeMultiplexInput, maxWaitDur time.Duration, optFns ...func(*MultiplexDeletedWaiterOptions)) (*DescribeMultiplexOutput, error) {
 	if maxWaitDur <= 0 {
-		return fmt.Errorf("maximum wait time for waiter must be greater than zero")
+		return nil, fmt.Errorf("maximum wait time for waiter must be greater than zero")
 	}
 
 	options := w.options
@@ -415,7 +433,7 @@ func (w *MultiplexDeletedWaiter) Wait(ctx context.Context, params *DescribeMulti
 	}
 
 	if options.MinDelay > options.MaxDelay {
-		return fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
+		return nil, fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
 	}
 
 	ctx, cancelFn := context.WithTimeout(ctx, maxWaitDur)
@@ -443,10 +461,10 @@ func (w *MultiplexDeletedWaiter) Wait(ctx context.Context, params *DescribeMulti
 
 		retryable, err := options.Retryable(ctx, params, out, err)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !retryable {
-			return nil
+			return out, nil
 		}
 
 		remainingTime -= time.Since(start)
@@ -459,16 +477,16 @@ func (w *MultiplexDeletedWaiter) Wait(ctx context.Context, params *DescribeMulti
 			attempt, options.MinDelay, options.MaxDelay, remainingTime,
 		)
 		if err != nil {
-			return fmt.Errorf("error computing waiter delay, %w", err)
+			return nil, fmt.Errorf("error computing waiter delay, %w", err)
 		}
 
 		remainingTime -= delay
 		// sleep for the delay amount before invoking a request
 		if err := smithytime.SleepWithContext(ctx, delay); err != nil {
-			return fmt.Errorf("request cancelled while waiting, %w", err)
+			return nil, fmt.Errorf("request cancelled while waiting, %w", err)
 		}
 	}
-	return fmt.Errorf("exceeded max wait time for MultiplexDeleted waiter")
+	return nil, fmt.Errorf("exceeded max wait time for MultiplexDeleted waiter")
 }
 
 func multiplexDeletedStateRetryable(ctx context.Context, input *DescribeMultiplexInput, output *DescribeMultiplexOutput, err error) (bool, error) {
@@ -576,8 +594,17 @@ func NewMultiplexRunningWaiter(client DescribeMultiplexAPIClient, optFns ...func
 // the maximum wait duration the waiter will wait. The maxWaitDur is required and
 // must be greater than zero.
 func (w *MultiplexRunningWaiter) Wait(ctx context.Context, params *DescribeMultiplexInput, maxWaitDur time.Duration, optFns ...func(*MultiplexRunningWaiterOptions)) error {
+	_, err := w.WaitForOutput(ctx, params, maxWaitDur, optFns...)
+	return err
+}
+
+// WaitForOutput calls the waiter function for MultiplexRunning waiter and returns
+// the output of the successful operation. The maxWaitDur is the maximum wait
+// duration the waiter will wait. The maxWaitDur is required and must be greater
+// than zero.
+func (w *MultiplexRunningWaiter) WaitForOutput(ctx context.Context, params *DescribeMultiplexInput, maxWaitDur time.Duration, optFns ...func(*MultiplexRunningWaiterOptions)) (*DescribeMultiplexOutput, error) {
 	if maxWaitDur <= 0 {
-		return fmt.Errorf("maximum wait time for waiter must be greater than zero")
+		return nil, fmt.Errorf("maximum wait time for waiter must be greater than zero")
 	}
 
 	options := w.options
@@ -590,7 +617,7 @@ func (w *MultiplexRunningWaiter) Wait(ctx context.Context, params *DescribeMulti
 	}
 
 	if options.MinDelay > options.MaxDelay {
-		return fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
+		return nil, fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
 	}
 
 	ctx, cancelFn := context.WithTimeout(ctx, maxWaitDur)
@@ -618,10 +645,10 @@ func (w *MultiplexRunningWaiter) Wait(ctx context.Context, params *DescribeMulti
 
 		retryable, err := options.Retryable(ctx, params, out, err)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !retryable {
-			return nil
+			return out, nil
 		}
 
 		remainingTime -= time.Since(start)
@@ -634,16 +661,16 @@ func (w *MultiplexRunningWaiter) Wait(ctx context.Context, params *DescribeMulti
 			attempt, options.MinDelay, options.MaxDelay, remainingTime,
 		)
 		if err != nil {
-			return fmt.Errorf("error computing waiter delay, %w", err)
+			return nil, fmt.Errorf("error computing waiter delay, %w", err)
 		}
 
 		remainingTime -= delay
 		// sleep for the delay amount before invoking a request
 		if err := smithytime.SleepWithContext(ctx, delay); err != nil {
-			return fmt.Errorf("request cancelled while waiting, %w", err)
+			return nil, fmt.Errorf("request cancelled while waiting, %w", err)
 		}
 	}
-	return fmt.Errorf("exceeded max wait time for MultiplexRunning waiter")
+	return nil, fmt.Errorf("exceeded max wait time for MultiplexRunning waiter")
 }
 
 func multiplexRunningStateRetryable(ctx context.Context, input *DescribeMultiplexInput, output *DescribeMultiplexOutput, err error) (bool, error) {
@@ -751,8 +778,17 @@ func NewMultiplexStoppedWaiter(client DescribeMultiplexAPIClient, optFns ...func
 // the maximum wait duration the waiter will wait. The maxWaitDur is required and
 // must be greater than zero.
 func (w *MultiplexStoppedWaiter) Wait(ctx context.Context, params *DescribeMultiplexInput, maxWaitDur time.Duration, optFns ...func(*MultiplexStoppedWaiterOptions)) error {
+	_, err := w.WaitForOutput(ctx, params, maxWaitDur, optFns...)
+	return err
+}
+
+// WaitForOutput calls the waiter function for MultiplexStopped waiter and returns
+// the output of the successful operation. The maxWaitDur is the maximum wait
+// duration the waiter will wait. The maxWaitDur is required and must be greater
+// than zero.
+func (w *MultiplexStoppedWaiter) WaitForOutput(ctx context.Context, params *DescribeMultiplexInput, maxWaitDur time.Duration, optFns ...func(*MultiplexStoppedWaiterOptions)) (*DescribeMultiplexOutput, error) {
 	if maxWaitDur <= 0 {
-		return fmt.Errorf("maximum wait time for waiter must be greater than zero")
+		return nil, fmt.Errorf("maximum wait time for waiter must be greater than zero")
 	}
 
 	options := w.options
@@ -765,7 +801,7 @@ func (w *MultiplexStoppedWaiter) Wait(ctx context.Context, params *DescribeMulti
 	}
 
 	if options.MinDelay > options.MaxDelay {
-		return fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
+		return nil, fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
 	}
 
 	ctx, cancelFn := context.WithTimeout(ctx, maxWaitDur)
@@ -793,10 +829,10 @@ func (w *MultiplexStoppedWaiter) Wait(ctx context.Context, params *DescribeMulti
 
 		retryable, err := options.Retryable(ctx, params, out, err)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !retryable {
-			return nil
+			return out, nil
 		}
 
 		remainingTime -= time.Since(start)
@@ -809,16 +845,16 @@ func (w *MultiplexStoppedWaiter) Wait(ctx context.Context, params *DescribeMulti
 			attempt, options.MinDelay, options.MaxDelay, remainingTime,
 		)
 		if err != nil {
-			return fmt.Errorf("error computing waiter delay, %w", err)
+			return nil, fmt.Errorf("error computing waiter delay, %w", err)
 		}
 
 		remainingTime -= delay
 		// sleep for the delay amount before invoking a request
 		if err := smithytime.SleepWithContext(ctx, delay); err != nil {
-			return fmt.Errorf("request cancelled while waiting, %w", err)
+			return nil, fmt.Errorf("request cancelled while waiting, %w", err)
 		}
 	}
-	return fmt.Errorf("exceeded max wait time for MultiplexStopped waiter")
+	return nil, fmt.Errorf("exceeded max wait time for MultiplexStopped waiter")
 }
 
 func multiplexStoppedStateRetryable(ctx context.Context, input *DescribeMultiplexInput, output *DescribeMultiplexOutput, err error) (bool, error) {

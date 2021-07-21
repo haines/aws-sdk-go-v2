@@ -233,8 +233,17 @@ func NewChannelCreatedWaiter(client DescribeChannelAPIClient, optFns ...func(*Ch
 // maximum wait duration the waiter will wait. The maxWaitDur is required and must
 // be greater than zero.
 func (w *ChannelCreatedWaiter) Wait(ctx context.Context, params *DescribeChannelInput, maxWaitDur time.Duration, optFns ...func(*ChannelCreatedWaiterOptions)) error {
+	_, err := w.WaitForOutput(ctx, params, maxWaitDur, optFns...)
+	return err
+}
+
+// WaitForOutput calls the waiter function for ChannelCreated waiter and returns
+// the output of the successful operation. The maxWaitDur is the maximum wait
+// duration the waiter will wait. The maxWaitDur is required and must be greater
+// than zero.
+func (w *ChannelCreatedWaiter) WaitForOutput(ctx context.Context, params *DescribeChannelInput, maxWaitDur time.Duration, optFns ...func(*ChannelCreatedWaiterOptions)) (*DescribeChannelOutput, error) {
 	if maxWaitDur <= 0 {
-		return fmt.Errorf("maximum wait time for waiter must be greater than zero")
+		return nil, fmt.Errorf("maximum wait time for waiter must be greater than zero")
 	}
 
 	options := w.options
@@ -247,7 +256,7 @@ func (w *ChannelCreatedWaiter) Wait(ctx context.Context, params *DescribeChannel
 	}
 
 	if options.MinDelay > options.MaxDelay {
-		return fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
+		return nil, fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
 	}
 
 	ctx, cancelFn := context.WithTimeout(ctx, maxWaitDur)
@@ -275,10 +284,10 @@ func (w *ChannelCreatedWaiter) Wait(ctx context.Context, params *DescribeChannel
 
 		retryable, err := options.Retryable(ctx, params, out, err)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !retryable {
-			return nil
+			return out, nil
 		}
 
 		remainingTime -= time.Since(start)
@@ -291,16 +300,16 @@ func (w *ChannelCreatedWaiter) Wait(ctx context.Context, params *DescribeChannel
 			attempt, options.MinDelay, options.MaxDelay, remainingTime,
 		)
 		if err != nil {
-			return fmt.Errorf("error computing waiter delay, %w", err)
+			return nil, fmt.Errorf("error computing waiter delay, %w", err)
 		}
 
 		remainingTime -= delay
 		// sleep for the delay amount before invoking a request
 		if err := smithytime.SleepWithContext(ctx, delay); err != nil {
-			return fmt.Errorf("request cancelled while waiting, %w", err)
+			return nil, fmt.Errorf("request cancelled while waiting, %w", err)
 		}
 	}
-	return fmt.Errorf("exceeded max wait time for ChannelCreated waiter")
+	return nil, fmt.Errorf("exceeded max wait time for ChannelCreated waiter")
 }
 
 func channelCreatedStateRetryable(ctx context.Context, input *DescribeChannelInput, output *DescribeChannelOutput, err error) (bool, error) {
@@ -425,8 +434,17 @@ func NewChannelDeletedWaiter(client DescribeChannelAPIClient, optFns ...func(*Ch
 // maximum wait duration the waiter will wait. The maxWaitDur is required and must
 // be greater than zero.
 func (w *ChannelDeletedWaiter) Wait(ctx context.Context, params *DescribeChannelInput, maxWaitDur time.Duration, optFns ...func(*ChannelDeletedWaiterOptions)) error {
+	_, err := w.WaitForOutput(ctx, params, maxWaitDur, optFns...)
+	return err
+}
+
+// WaitForOutput calls the waiter function for ChannelDeleted waiter and returns
+// the output of the successful operation. The maxWaitDur is the maximum wait
+// duration the waiter will wait. The maxWaitDur is required and must be greater
+// than zero.
+func (w *ChannelDeletedWaiter) WaitForOutput(ctx context.Context, params *DescribeChannelInput, maxWaitDur time.Duration, optFns ...func(*ChannelDeletedWaiterOptions)) (*DescribeChannelOutput, error) {
 	if maxWaitDur <= 0 {
-		return fmt.Errorf("maximum wait time for waiter must be greater than zero")
+		return nil, fmt.Errorf("maximum wait time for waiter must be greater than zero")
 	}
 
 	options := w.options
@@ -439,7 +457,7 @@ func (w *ChannelDeletedWaiter) Wait(ctx context.Context, params *DescribeChannel
 	}
 
 	if options.MinDelay > options.MaxDelay {
-		return fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
+		return nil, fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
 	}
 
 	ctx, cancelFn := context.WithTimeout(ctx, maxWaitDur)
@@ -467,10 +485,10 @@ func (w *ChannelDeletedWaiter) Wait(ctx context.Context, params *DescribeChannel
 
 		retryable, err := options.Retryable(ctx, params, out, err)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !retryable {
-			return nil
+			return out, nil
 		}
 
 		remainingTime -= time.Since(start)
@@ -483,16 +501,16 @@ func (w *ChannelDeletedWaiter) Wait(ctx context.Context, params *DescribeChannel
 			attempt, options.MinDelay, options.MaxDelay, remainingTime,
 		)
 		if err != nil {
-			return fmt.Errorf("error computing waiter delay, %w", err)
+			return nil, fmt.Errorf("error computing waiter delay, %w", err)
 		}
 
 		remainingTime -= delay
 		// sleep for the delay amount before invoking a request
 		if err := smithytime.SleepWithContext(ctx, delay); err != nil {
-			return fmt.Errorf("request cancelled while waiting, %w", err)
+			return nil, fmt.Errorf("request cancelled while waiting, %w", err)
 		}
 	}
-	return fmt.Errorf("exceeded max wait time for ChannelDeleted waiter")
+	return nil, fmt.Errorf("exceeded max wait time for ChannelDeleted waiter")
 }
 
 func channelDeletedStateRetryable(ctx context.Context, input *DescribeChannelInput, output *DescribeChannelOutput, err error) (bool, error) {
@@ -600,8 +618,17 @@ func NewChannelRunningWaiter(client DescribeChannelAPIClient, optFns ...func(*Ch
 // maximum wait duration the waiter will wait. The maxWaitDur is required and must
 // be greater than zero.
 func (w *ChannelRunningWaiter) Wait(ctx context.Context, params *DescribeChannelInput, maxWaitDur time.Duration, optFns ...func(*ChannelRunningWaiterOptions)) error {
+	_, err := w.WaitForOutput(ctx, params, maxWaitDur, optFns...)
+	return err
+}
+
+// WaitForOutput calls the waiter function for ChannelRunning waiter and returns
+// the output of the successful operation. The maxWaitDur is the maximum wait
+// duration the waiter will wait. The maxWaitDur is required and must be greater
+// than zero.
+func (w *ChannelRunningWaiter) WaitForOutput(ctx context.Context, params *DescribeChannelInput, maxWaitDur time.Duration, optFns ...func(*ChannelRunningWaiterOptions)) (*DescribeChannelOutput, error) {
 	if maxWaitDur <= 0 {
-		return fmt.Errorf("maximum wait time for waiter must be greater than zero")
+		return nil, fmt.Errorf("maximum wait time for waiter must be greater than zero")
 	}
 
 	options := w.options
@@ -614,7 +641,7 @@ func (w *ChannelRunningWaiter) Wait(ctx context.Context, params *DescribeChannel
 	}
 
 	if options.MinDelay > options.MaxDelay {
-		return fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
+		return nil, fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
 	}
 
 	ctx, cancelFn := context.WithTimeout(ctx, maxWaitDur)
@@ -642,10 +669,10 @@ func (w *ChannelRunningWaiter) Wait(ctx context.Context, params *DescribeChannel
 
 		retryable, err := options.Retryable(ctx, params, out, err)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !retryable {
-			return nil
+			return out, nil
 		}
 
 		remainingTime -= time.Since(start)
@@ -658,16 +685,16 @@ func (w *ChannelRunningWaiter) Wait(ctx context.Context, params *DescribeChannel
 			attempt, options.MinDelay, options.MaxDelay, remainingTime,
 		)
 		if err != nil {
-			return fmt.Errorf("error computing waiter delay, %w", err)
+			return nil, fmt.Errorf("error computing waiter delay, %w", err)
 		}
 
 		remainingTime -= delay
 		// sleep for the delay amount before invoking a request
 		if err := smithytime.SleepWithContext(ctx, delay); err != nil {
-			return fmt.Errorf("request cancelled while waiting, %w", err)
+			return nil, fmt.Errorf("request cancelled while waiting, %w", err)
 		}
 	}
-	return fmt.Errorf("exceeded max wait time for ChannelRunning waiter")
+	return nil, fmt.Errorf("exceeded max wait time for ChannelRunning waiter")
 }
 
 func channelRunningStateRetryable(ctx context.Context, input *DescribeChannelInput, output *DescribeChannelOutput, err error) (bool, error) {
@@ -775,8 +802,17 @@ func NewChannelStoppedWaiter(client DescribeChannelAPIClient, optFns ...func(*Ch
 // maximum wait duration the waiter will wait. The maxWaitDur is required and must
 // be greater than zero.
 func (w *ChannelStoppedWaiter) Wait(ctx context.Context, params *DescribeChannelInput, maxWaitDur time.Duration, optFns ...func(*ChannelStoppedWaiterOptions)) error {
+	_, err := w.WaitForOutput(ctx, params, maxWaitDur, optFns...)
+	return err
+}
+
+// WaitForOutput calls the waiter function for ChannelStopped waiter and returns
+// the output of the successful operation. The maxWaitDur is the maximum wait
+// duration the waiter will wait. The maxWaitDur is required and must be greater
+// than zero.
+func (w *ChannelStoppedWaiter) WaitForOutput(ctx context.Context, params *DescribeChannelInput, maxWaitDur time.Duration, optFns ...func(*ChannelStoppedWaiterOptions)) (*DescribeChannelOutput, error) {
 	if maxWaitDur <= 0 {
-		return fmt.Errorf("maximum wait time for waiter must be greater than zero")
+		return nil, fmt.Errorf("maximum wait time for waiter must be greater than zero")
 	}
 
 	options := w.options
@@ -789,7 +825,7 @@ func (w *ChannelStoppedWaiter) Wait(ctx context.Context, params *DescribeChannel
 	}
 
 	if options.MinDelay > options.MaxDelay {
-		return fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
+		return nil, fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
 	}
 
 	ctx, cancelFn := context.WithTimeout(ctx, maxWaitDur)
@@ -817,10 +853,10 @@ func (w *ChannelStoppedWaiter) Wait(ctx context.Context, params *DescribeChannel
 
 		retryable, err := options.Retryable(ctx, params, out, err)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !retryable {
-			return nil
+			return out, nil
 		}
 
 		remainingTime -= time.Since(start)
@@ -833,16 +869,16 @@ func (w *ChannelStoppedWaiter) Wait(ctx context.Context, params *DescribeChannel
 			attempt, options.MinDelay, options.MaxDelay, remainingTime,
 		)
 		if err != nil {
-			return fmt.Errorf("error computing waiter delay, %w", err)
+			return nil, fmt.Errorf("error computing waiter delay, %w", err)
 		}
 
 		remainingTime -= delay
 		// sleep for the delay amount before invoking a request
 		if err := smithytime.SleepWithContext(ctx, delay); err != nil {
-			return fmt.Errorf("request cancelled while waiting, %w", err)
+			return nil, fmt.Errorf("request cancelled while waiting, %w", err)
 		}
 	}
-	return fmt.Errorf("exceeded max wait time for ChannelStopped waiter")
+	return nil, fmt.Errorf("exceeded max wait time for ChannelStopped waiter")
 }
 
 func channelStoppedStateRetryable(ctx context.Context, input *DescribeChannelInput, output *DescribeChannelOutput, err error) (bool, error) {

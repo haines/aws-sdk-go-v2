@@ -290,8 +290,17 @@ func NewProjectVersionRunningWaiter(client DescribeProjectVersionsAPIClient, opt
 // is the maximum wait duration the waiter will wait. The maxWaitDur is required
 // and must be greater than zero.
 func (w *ProjectVersionRunningWaiter) Wait(ctx context.Context, params *DescribeProjectVersionsInput, maxWaitDur time.Duration, optFns ...func(*ProjectVersionRunningWaiterOptions)) error {
+	_, err := w.WaitForOutput(ctx, params, maxWaitDur, optFns...)
+	return err
+}
+
+// WaitForOutput calls the waiter function for ProjectVersionRunning waiter and
+// returns the output of the successful operation. The maxWaitDur is the maximum
+// wait duration the waiter will wait. The maxWaitDur is required and must be
+// greater than zero.
+func (w *ProjectVersionRunningWaiter) WaitForOutput(ctx context.Context, params *DescribeProjectVersionsInput, maxWaitDur time.Duration, optFns ...func(*ProjectVersionRunningWaiterOptions)) (*DescribeProjectVersionsOutput, error) {
 	if maxWaitDur <= 0 {
-		return fmt.Errorf("maximum wait time for waiter must be greater than zero")
+		return nil, fmt.Errorf("maximum wait time for waiter must be greater than zero")
 	}
 
 	options := w.options
@@ -304,7 +313,7 @@ func (w *ProjectVersionRunningWaiter) Wait(ctx context.Context, params *Describe
 	}
 
 	if options.MinDelay > options.MaxDelay {
-		return fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
+		return nil, fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
 	}
 
 	ctx, cancelFn := context.WithTimeout(ctx, maxWaitDur)
@@ -332,10 +341,10 @@ func (w *ProjectVersionRunningWaiter) Wait(ctx context.Context, params *Describe
 
 		retryable, err := options.Retryable(ctx, params, out, err)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !retryable {
-			return nil
+			return out, nil
 		}
 
 		remainingTime -= time.Since(start)
@@ -348,16 +357,16 @@ func (w *ProjectVersionRunningWaiter) Wait(ctx context.Context, params *Describe
 			attempt, options.MinDelay, options.MaxDelay, remainingTime,
 		)
 		if err != nil {
-			return fmt.Errorf("error computing waiter delay, %w", err)
+			return nil, fmt.Errorf("error computing waiter delay, %w", err)
 		}
 
 		remainingTime -= delay
 		// sleep for the delay amount before invoking a request
 		if err := smithytime.SleepWithContext(ctx, delay); err != nil {
-			return fmt.Errorf("request cancelled while waiting, %w", err)
+			return nil, fmt.Errorf("request cancelled while waiting, %w", err)
 		}
 	}
-	return fmt.Errorf("exceeded max wait time for ProjectVersionRunning waiter")
+	return nil, fmt.Errorf("exceeded max wait time for ProjectVersionRunning waiter")
 }
 
 func projectVersionRunningStateRetryable(ctx context.Context, input *DescribeProjectVersionsInput, output *DescribeProjectVersionsOutput, err error) (bool, error) {
@@ -485,8 +494,17 @@ func NewProjectVersionTrainingCompletedWaiter(client DescribeProjectVersionsAPIC
 // maxWaitDur is the maximum wait duration the waiter will wait. The maxWaitDur is
 // required and must be greater than zero.
 func (w *ProjectVersionTrainingCompletedWaiter) Wait(ctx context.Context, params *DescribeProjectVersionsInput, maxWaitDur time.Duration, optFns ...func(*ProjectVersionTrainingCompletedWaiterOptions)) error {
+	_, err := w.WaitForOutput(ctx, params, maxWaitDur, optFns...)
+	return err
+}
+
+// WaitForOutput calls the waiter function for ProjectVersionTrainingCompleted
+// waiter and returns the output of the successful operation. The maxWaitDur is the
+// maximum wait duration the waiter will wait. The maxWaitDur is required and must
+// be greater than zero.
+func (w *ProjectVersionTrainingCompletedWaiter) WaitForOutput(ctx context.Context, params *DescribeProjectVersionsInput, maxWaitDur time.Duration, optFns ...func(*ProjectVersionTrainingCompletedWaiterOptions)) (*DescribeProjectVersionsOutput, error) {
 	if maxWaitDur <= 0 {
-		return fmt.Errorf("maximum wait time for waiter must be greater than zero")
+		return nil, fmt.Errorf("maximum wait time for waiter must be greater than zero")
 	}
 
 	options := w.options
@@ -499,7 +517,7 @@ func (w *ProjectVersionTrainingCompletedWaiter) Wait(ctx context.Context, params
 	}
 
 	if options.MinDelay > options.MaxDelay {
-		return fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
+		return nil, fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
 	}
 
 	ctx, cancelFn := context.WithTimeout(ctx, maxWaitDur)
@@ -527,10 +545,10 @@ func (w *ProjectVersionTrainingCompletedWaiter) Wait(ctx context.Context, params
 
 		retryable, err := options.Retryable(ctx, params, out, err)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !retryable {
-			return nil
+			return out, nil
 		}
 
 		remainingTime -= time.Since(start)
@@ -543,16 +561,16 @@ func (w *ProjectVersionTrainingCompletedWaiter) Wait(ctx context.Context, params
 			attempt, options.MinDelay, options.MaxDelay, remainingTime,
 		)
 		if err != nil {
-			return fmt.Errorf("error computing waiter delay, %w", err)
+			return nil, fmt.Errorf("error computing waiter delay, %w", err)
 		}
 
 		remainingTime -= delay
 		// sleep for the delay amount before invoking a request
 		if err := smithytime.SleepWithContext(ctx, delay); err != nil {
-			return fmt.Errorf("request cancelled while waiting, %w", err)
+			return nil, fmt.Errorf("request cancelled while waiting, %w", err)
 		}
 	}
-	return fmt.Errorf("exceeded max wait time for ProjectVersionTrainingCompleted waiter")
+	return nil, fmt.Errorf("exceeded max wait time for ProjectVersionTrainingCompleted waiter")
 }
 
 func projectVersionTrainingCompletedStateRetryable(ctx context.Context, input *DescribeProjectVersionsInput, output *DescribeProjectVersionsOutput, err error) (bool, error) {

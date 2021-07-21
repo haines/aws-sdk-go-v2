@@ -236,8 +236,16 @@ func NewInputAttachedWaiter(client DescribeInputAPIClient, optFns ...func(*Input
 // maximum wait duration the waiter will wait. The maxWaitDur is required and must
 // be greater than zero.
 func (w *InputAttachedWaiter) Wait(ctx context.Context, params *DescribeInputInput, maxWaitDur time.Duration, optFns ...func(*InputAttachedWaiterOptions)) error {
+	_, err := w.WaitForOutput(ctx, params, maxWaitDur, optFns...)
+	return err
+}
+
+// WaitForOutput calls the waiter function for InputAttached waiter and returns the
+// output of the successful operation. The maxWaitDur is the maximum wait duration
+// the waiter will wait. The maxWaitDur is required and must be greater than zero.
+func (w *InputAttachedWaiter) WaitForOutput(ctx context.Context, params *DescribeInputInput, maxWaitDur time.Duration, optFns ...func(*InputAttachedWaiterOptions)) (*DescribeInputOutput, error) {
 	if maxWaitDur <= 0 {
-		return fmt.Errorf("maximum wait time for waiter must be greater than zero")
+		return nil, fmt.Errorf("maximum wait time for waiter must be greater than zero")
 	}
 
 	options := w.options
@@ -250,7 +258,7 @@ func (w *InputAttachedWaiter) Wait(ctx context.Context, params *DescribeInputInp
 	}
 
 	if options.MinDelay > options.MaxDelay {
-		return fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
+		return nil, fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
 	}
 
 	ctx, cancelFn := context.WithTimeout(ctx, maxWaitDur)
@@ -278,10 +286,10 @@ func (w *InputAttachedWaiter) Wait(ctx context.Context, params *DescribeInputInp
 
 		retryable, err := options.Retryable(ctx, params, out, err)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !retryable {
-			return nil
+			return out, nil
 		}
 
 		remainingTime -= time.Since(start)
@@ -294,16 +302,16 @@ func (w *InputAttachedWaiter) Wait(ctx context.Context, params *DescribeInputInp
 			attempt, options.MinDelay, options.MaxDelay, remainingTime,
 		)
 		if err != nil {
-			return fmt.Errorf("error computing waiter delay, %w", err)
+			return nil, fmt.Errorf("error computing waiter delay, %w", err)
 		}
 
 		remainingTime -= delay
 		// sleep for the delay amount before invoking a request
 		if err := smithytime.SleepWithContext(ctx, delay); err != nil {
-			return fmt.Errorf("request cancelled while waiting, %w", err)
+			return nil, fmt.Errorf("request cancelled while waiting, %w", err)
 		}
 	}
-	return fmt.Errorf("exceeded max wait time for InputAttached waiter")
+	return nil, fmt.Errorf("exceeded max wait time for InputAttached waiter")
 }
 
 func inputAttachedStateRetryable(ctx context.Context, input *DescribeInputInput, output *DescribeInputOutput, err error) (bool, error) {
@@ -411,8 +419,16 @@ func NewInputDeletedWaiter(client DescribeInputAPIClient, optFns ...func(*InputD
 // maximum wait duration the waiter will wait. The maxWaitDur is required and must
 // be greater than zero.
 func (w *InputDeletedWaiter) Wait(ctx context.Context, params *DescribeInputInput, maxWaitDur time.Duration, optFns ...func(*InputDeletedWaiterOptions)) error {
+	_, err := w.WaitForOutput(ctx, params, maxWaitDur, optFns...)
+	return err
+}
+
+// WaitForOutput calls the waiter function for InputDeleted waiter and returns the
+// output of the successful operation. The maxWaitDur is the maximum wait duration
+// the waiter will wait. The maxWaitDur is required and must be greater than zero.
+func (w *InputDeletedWaiter) WaitForOutput(ctx context.Context, params *DescribeInputInput, maxWaitDur time.Duration, optFns ...func(*InputDeletedWaiterOptions)) (*DescribeInputOutput, error) {
 	if maxWaitDur <= 0 {
-		return fmt.Errorf("maximum wait time for waiter must be greater than zero")
+		return nil, fmt.Errorf("maximum wait time for waiter must be greater than zero")
 	}
 
 	options := w.options
@@ -425,7 +441,7 @@ func (w *InputDeletedWaiter) Wait(ctx context.Context, params *DescribeInputInpu
 	}
 
 	if options.MinDelay > options.MaxDelay {
-		return fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
+		return nil, fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
 	}
 
 	ctx, cancelFn := context.WithTimeout(ctx, maxWaitDur)
@@ -453,10 +469,10 @@ func (w *InputDeletedWaiter) Wait(ctx context.Context, params *DescribeInputInpu
 
 		retryable, err := options.Retryable(ctx, params, out, err)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !retryable {
-			return nil
+			return out, nil
 		}
 
 		remainingTime -= time.Since(start)
@@ -469,16 +485,16 @@ func (w *InputDeletedWaiter) Wait(ctx context.Context, params *DescribeInputInpu
 			attempt, options.MinDelay, options.MaxDelay, remainingTime,
 		)
 		if err != nil {
-			return fmt.Errorf("error computing waiter delay, %w", err)
+			return nil, fmt.Errorf("error computing waiter delay, %w", err)
 		}
 
 		remainingTime -= delay
 		// sleep for the delay amount before invoking a request
 		if err := smithytime.SleepWithContext(ctx, delay); err != nil {
-			return fmt.Errorf("request cancelled while waiting, %w", err)
+			return nil, fmt.Errorf("request cancelled while waiting, %w", err)
 		}
 	}
-	return fmt.Errorf("exceeded max wait time for InputDeleted waiter")
+	return nil, fmt.Errorf("exceeded max wait time for InputDeleted waiter")
 }
 
 func inputDeletedStateRetryable(ctx context.Context, input *DescribeInputInput, output *DescribeInputOutput, err error) (bool, error) {
@@ -586,8 +602,16 @@ func NewInputDetachedWaiter(client DescribeInputAPIClient, optFns ...func(*Input
 // maximum wait duration the waiter will wait. The maxWaitDur is required and must
 // be greater than zero.
 func (w *InputDetachedWaiter) Wait(ctx context.Context, params *DescribeInputInput, maxWaitDur time.Duration, optFns ...func(*InputDetachedWaiterOptions)) error {
+	_, err := w.WaitForOutput(ctx, params, maxWaitDur, optFns...)
+	return err
+}
+
+// WaitForOutput calls the waiter function for InputDetached waiter and returns the
+// output of the successful operation. The maxWaitDur is the maximum wait duration
+// the waiter will wait. The maxWaitDur is required and must be greater than zero.
+func (w *InputDetachedWaiter) WaitForOutput(ctx context.Context, params *DescribeInputInput, maxWaitDur time.Duration, optFns ...func(*InputDetachedWaiterOptions)) (*DescribeInputOutput, error) {
 	if maxWaitDur <= 0 {
-		return fmt.Errorf("maximum wait time for waiter must be greater than zero")
+		return nil, fmt.Errorf("maximum wait time for waiter must be greater than zero")
 	}
 
 	options := w.options
@@ -600,7 +624,7 @@ func (w *InputDetachedWaiter) Wait(ctx context.Context, params *DescribeInputInp
 	}
 
 	if options.MinDelay > options.MaxDelay {
-		return fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
+		return nil, fmt.Errorf("minimum waiter delay %v must be lesser than or equal to maximum waiter delay of %v.", options.MinDelay, options.MaxDelay)
 	}
 
 	ctx, cancelFn := context.WithTimeout(ctx, maxWaitDur)
@@ -628,10 +652,10 @@ func (w *InputDetachedWaiter) Wait(ctx context.Context, params *DescribeInputInp
 
 		retryable, err := options.Retryable(ctx, params, out, err)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !retryable {
-			return nil
+			return out, nil
 		}
 
 		remainingTime -= time.Since(start)
@@ -644,16 +668,16 @@ func (w *InputDetachedWaiter) Wait(ctx context.Context, params *DescribeInputInp
 			attempt, options.MinDelay, options.MaxDelay, remainingTime,
 		)
 		if err != nil {
-			return fmt.Errorf("error computing waiter delay, %w", err)
+			return nil, fmt.Errorf("error computing waiter delay, %w", err)
 		}
 
 		remainingTime -= delay
 		// sleep for the delay amount before invoking a request
 		if err := smithytime.SleepWithContext(ctx, delay); err != nil {
-			return fmt.Errorf("request cancelled while waiting, %w", err)
+			return nil, fmt.Errorf("request cancelled while waiting, %w", err)
 		}
 	}
-	return fmt.Errorf("exceeded max wait time for InputDetached waiter")
+	return nil, fmt.Errorf("exceeded max wait time for InputDetached waiter")
 }
 
 func inputDetachedStateRetryable(ctx context.Context, input *DescribeInputInput, output *DescribeInputOutput, err error) (bool, error) {
